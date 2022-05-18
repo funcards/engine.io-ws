@@ -11,7 +11,7 @@ Use go get.
 go get github.com/funcards/engine.io-ws
 ```
 
-Then import **socket.io** package into your own code.
+Then import **engine.io-ws** package into your own code.
 
 ```go
 import "github.com/funcards/engine.io-ws"
