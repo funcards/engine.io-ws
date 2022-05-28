@@ -65,9 +65,10 @@ func (s *IOWebSocket) Close() error {
 	defer s.io.Unlock()
 
 	if s.conn != nil {
-		err := s.conn.Close()
+		if err := s.conn.Close(); err != nil {
+			s.log.Warn("io websocket close", zap.Error(err))
+		}
 		s.conn = nil
-		return err
 	}
 	return nil
 }
