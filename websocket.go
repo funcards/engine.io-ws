@@ -1,6 +1,8 @@
 package eiows
 
 import (
+	"context"
+	"errors"
 	"github.com/funcards/engine.io"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
@@ -8,6 +10,8 @@ import (
 	"net/url"
 	"sync"
 )
+
+var ClosedError = errors.New("IOWebSocket closed")
 
 type IOWebSocket struct {
 	eio.Emitter
@@ -33,8 +37,8 @@ func (s *IOWebSocket) GetHeaders() map[string]string {
 	return s.conn.headers
 }
 
-func (s *IOWebSocket) Write(data any) error {
-	go func(data any) {
+func (s *IOWebSocket) Write(ctx context.Context, data any) {
+	go func(ctx context.Context, data any) {
 		s.io.Lock()
 		defer s.io.Unlock()
 
@@ -44,23 +48,18 @@ func (s *IOWebSocket) Write(data any) error {
 		case string:
 			if err := wsutil.WriteServerText(s.conn, []byte(tmp)); err != nil {
 				s.log.Warn("websocket write text", zap.Error(err))
-				if err = s.Emit(eio.TopicError, "websocket write", err.Error()); err != nil {
-					s.log.Warn("websocket emit", zap.Error(err))
-				}
+				s.Emit(ctx, eio.TopicError, "websocket write", err.Error())
 			}
 		case []byte:
 			if err := wsutil.WriteServerBinary(s.conn, tmp); err != nil {
 				s.log.Warn("websocket write binary", zap.Error(err))
-				if err = s.Emit(eio.TopicError, "websocket write", err.Error()); err != nil {
-					s.log.Warn("websocket emit", zap.Error(err))
-				}
+				s.Emit(ctx, eio.TopicError, "websocket write", err.Error())
 			}
 		}
-	}(data)
-	return nil
+	}(ctx, data)
 }
 
-func (s *IOWebSocket) Close() error {
+func (s *IOWebSocket) Close(ctx context.Context) {
 	s.io.Lock()
 	defer s.io.Unlock()
 
@@ -69,18 +68,18 @@ func (s *IOWebSocket) Close() error {
 			s.log.Warn("io websocket close", zap.Error(err))
 		}
 		s.conn = nil
+		eio.TryCancel(ctx, ClosedError)
 	}
-	return nil
 }
 
-func (s *IOWebSocket) OnClose() error {
+func (s *IOWebSocket) OnClose(ctx context.Context) {
 	s.io.Lock()
 	defer s.io.Unlock()
 
-	return s.Emit(eio.TopicClose)
+	s.Emit(ctx, eio.TopicClose)
 }
 
-func (s *IOWebSocket) Receive() error {
+func (s *IOWebSocket) Receive(ctx context.Context) {
 	s.io.Lock()
 	data, op, err := wsutil.ReadClientData(s.conn)
 	s.io.Unlock()
@@ -89,7 +88,8 @@ func (s *IOWebSocket) Receive() error {
 		if closed, ok := err.(wsutil.ClosedError); ok {
 			s.log.Info("peer has closed the connection", zap.String("reason", closed.Reason), zap.Error(closed))
 		}
-		return err
+		eio.TryCancel(ctx, err)
+		return
 	}
 
 	isText := op == ws.OpText
@@ -97,8 +97,8 @@ func (s *IOWebSocket) Receive() error {
 	s.log.Debug("ws received", zap.Bool("is_text", isText), zap.Binary("data", data))
 
 	if isText {
-		return s.Emit(eio.TopicMessage, string(data))
+		s.Emit(ctx, eio.TopicMessage, string(data))
 	} else {
-		return s.Emit(eio.TopicMessage, data)
+		s.Emit(ctx, eio.TopicMessage, data)
 	}
 }

@@ -5,6 +5,8 @@ github.com/funcards/engine.io v0.0.0-20220518122048-375fc515cdbf h1:fwp0wA4JRtvs
 github.com/funcards/engine.io v0.0.0-20220518122048-375fc515cdbf/go.mod h1:kJVnmyZWaYtp26iK5rZImy2I/lSfXdIMtjMhY9xCjWs=
 github.com/funcards/engine.io v0.0.0-20220528112019-e27c3ad3cf74 h1:HKJwMWJGzMcQs36AJLgu4gmDBGGqIXlgt41iwTrBkgM=
 github.com/funcards/engine.io v0.0.0-20220528112019-e27c3ad3cf74/go.mod h1:kJVnmyZWaYtp26iK5rZImy2I/lSfXdIMtjMhY9xCjWs=
+github.com/funcards/engine.io v0.0.0-20220528133056-e7b9506d3055 h1:BFvq/DVSPFP0oNkesRan5C7y5IJK9gOfhoo36MViqAE=
+github.com/funcards/engine.io v0.0.0-20220528133056-e7b9506d3055/go.mod h1:kJVnmyZWaYtp26iK5rZImy2I/lSfXdIMtjMhY9xCjWs=
 github.com/funcards/engine.io-parser/v4 v4.0.0-20220513212218-27624224a21c h1:GLN4isgrl0cHodpItwr/tEKyfpUFn/2sgbta9tJzaFs=
 github.com/funcards/engine.io-parser/v4 v4.0.0-20220513212218-27624224a21c/go.mod h1:zIu85DkDET2OrI+kX6vjeuqHHfwmqbW/kmjqmVrcpFU=
 github.com/gobwas/httphead v0.1.0 h1:exrUm0f4YX0L7EBwZHuCF4GDp8aJfVeBrlLQrs6NqWU=
